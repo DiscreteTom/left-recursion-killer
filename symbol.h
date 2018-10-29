@@ -5,6 +5,16 @@
 
 using namespace std;
 
+/***************************************
+ * 
+ * Non-terminator - Capital characters
+ * Arrow          - "->"
+ * Divider        - '|'
+ * Epsilon        - '~'
+ * Terminator     - Other visible characters
+ * 
+ *************************************/
+
 class SymbolTable
 {
 private:
