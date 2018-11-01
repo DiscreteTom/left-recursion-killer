@@ -7,7 +7,7 @@ using namespace std;
 
 /***************************************
  * 
- * Non-terminator - Capital characters
+ * Non-terminator - Capital characters and with '\''
  * Arrow          - "->"
  * Divider        - '|'
  * Epsilon        - '~'
@@ -33,5 +33,5 @@ struct Symbol
 		NT // non-terminator
 	};
 	SymbolType type;
-	int c; // symbol index or char
-}
+	int index; // symbol index
+};
