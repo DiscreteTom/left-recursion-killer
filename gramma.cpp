@@ -40,7 +40,7 @@ string GrammaTable::format(const string &str)
 	//check format
 	int i = str.find('-');
 	if (str[i + 1] != '>')
-		result = "";
+		throw "Wrong input format";
 	return result;
 }
 
@@ -55,6 +55,7 @@ void GrammaTable::killExplicit(int index)
 			//get left recursion candidate and delete the origin one
 			vector<Symbol> candidate = grammas[index][i];
 			grammas[index].erase(grammas[index].begin() + i);
+			--i;
 			newCandidates.push_back(candidate);
 		}
 	}
@@ -71,10 +72,13 @@ void GrammaTable::killExplicit(int index)
 			//add new symbol to the end
 			newCandidates[i].push_back({Symbol::SymbolType::NT, newIndex});
 		}
-		// //add epsilon
-		// vector<Symbol> epsilon;
-		// epsilon.push_back({Symbol::SymbolType::T, 0}); // 0 for epsilon
-		// newCandidates.push_back(epsilon);
+		//add epsilon
+		if (grammas[index].size())
+		{
+			vector<Symbol> epsilon;
+			epsilon.push_back(EPSILON);
+			newCandidates.push_back(epsilon);
+		}
 		grammas.push_back(newCandidates);
 
 		// renew old candidate
@@ -82,7 +86,8 @@ void GrammaTable::killExplicit(int index)
 		{
 			grammas[index][i].push_back({Symbol::SymbolType::NT, newIndex});
 		}
-		if (!grammas[index].size()){
+		if (!grammas[index].size())
+		{
 			vector<Symbol> t;
 			t.push_back({Symbol::SymbolType::NT, newIndex});
 			grammas[index].push_back(t);
@@ -90,10 +95,29 @@ void GrammaTable::killExplicit(int index)
 	}
 }
 
+void GrammaTable::killEpsilon()
+{
+	for (auto &gramma : grammas)
+	{
+		for (auto &candidate : gramma)
+		{
+			for (int i = 0; i < candidate.size(); ++i)
+			{
+				if (candidate[i] == EPSILON && candidate.size() > 1)
+				{
+					candidate.erase(candidate.begin() + i);
+					--i;
+				}
+			}
+		}
+	}
+}
+
 void GrammaTable::insert(const string &grammaLine)
 {
 	string str = format(grammaLine);
-	if (!str.length()) return;// ERROR
+	if (!str.length())
+		return; // ERROR
 
 	// get left Symbol string
 	string left;
@@ -128,7 +152,7 @@ void GrammaTable::insert(const string &grammaLine)
 			}
 			//find this NT
 			int index = ntTable.getIndex(sym);
-			if (index == grammas.size())// new NT
+			if (index == grammas.size()) // new NT
 			{
 				grammas.push_back(vector<vector<Symbol>>());
 			}
@@ -147,7 +171,8 @@ void GrammaTable::insert(const string &grammaLine)
 		{
 			//other characters, inlcude '~', see them as terminator
 			sym = str[i];
-			while (i + 1 < str.length() && str[i + 1] == '\''){
+			while (i + 1 < str.length() && str[i + 1] == '\'')
+			{
 				sym += str[i + 1];
 				++i;
 			}
@@ -197,6 +222,7 @@ void GrammaTable::start()
 		}
 		// killUseless();
 	}
+	killEpsilon();
 	output();
 }
 
@@ -204,7 +230,8 @@ void GrammaTable::output()
 {
 	for (int i = 0; i < grammas.size(); ++i)
 	{
-		cout << ntTable.getStr(i) << " -> ";
+		if (grammas[i].size())
+			cout << ntTable.getStr(i) << " -> ";
 		for (int j = 0; j < grammas[i].size(); ++j)
 		{
 			//each candidate
@@ -220,9 +247,10 @@ void GrammaTable::output()
 				}
 			}
 			if (j != grammas[i].size() - 1)
-				cout << ' | ';
+				cout << " | ";
 		}
-		cout << endl;
+		if (grammas[i].size())
+			cout << endl;
 	}
 	cout << endl;
 }

@@ -1,5 +1,7 @@
 #include "symbol.h"
 
+const Symbol EPSILON = {Symbol::SymbolType::T, 0};
+
 int SymbolTable::getIndex(const string &str)
 {
 	for (int i = 0; i < strs.size(); ++i)

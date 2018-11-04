@@ -34,4 +34,8 @@ struct Symbol
 	};
 	SymbolType type;
 	int index; // symbol index
+
+	bool operator==(Symbol ano) { return ano.type == type && ano.index == index; }
 };
+
+extern const Symbol EPSILON;
